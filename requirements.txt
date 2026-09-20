@@ -1,0 +1,43 @@
+# ============================================================
+# 舆情危机预警与智能公关推演系统 - 依赖清单
+# Python 3.10+
+# 安装：pip install -r requirements.txt
+# ============================================================
+
+# Web框架
+fastapi>=0.138.0
+uvicorn>=0.34.0
+
+# 数据库
+pymysql>=1.1.1
+
+# 数据校验
+pydantic>=2.10.0
+
+# LangGraph 多智能体工作流
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-openai>=0.2.0
+
+# Qdrant 向量库（RAG检索）
+qdrant-client>=1.12.0
+
+# 向量化（TF-IDF，用于Qdrant降级模式）
+scikit-learn>=1.0.0
+numpy>=1.24.0
+
+# ==================== v2.0 新增依赖 ====================
+
+# 环境变量管理（.env 文件）
+python-dotenv>=1.0.0
+
+# LLM调用（OpenAI兼容API — DeepSeek / GPT-4o / Qwen等）
+openai>=1.50.0
+
+# HTTP请求（Google搜索API、SerpAPI）
+httpx>=0.28.0
+requests>=2.31.0
+
+# 浏览器搜索（Google/Bing无法用API时的降级方案）
+# 安装后还需要运行: playwright install chromium
+playwright>=1.48.0

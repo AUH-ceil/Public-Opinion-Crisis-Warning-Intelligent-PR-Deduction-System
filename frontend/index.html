@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>舆情危机预警与智能公关推演系统</title>
+
+<!-- TailwindCSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<!-- 自定义样式 -->
+<link rel="stylesheet" href="/css/style.css">
+
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        brand: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',950:'#172554' },
+        danger: { 50:'#fef2f2',500:'#ef4444',600:'#dc2626' },
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="min-h-screen">
+
+<!-- ==================== 顶部导航栏 ==================== -->
+<nav class="sticky top-0 z-50 backdrop-blur-xl border-b" style="background:var(--bg-card);border-color:var(--border);">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
+          <i class="fas fa-shield-halved text-white text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold gradient-title">舆情危机预警</h1>
+          <p class="text-xs opacity-60">智能公关推演系统</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="statusBadge" class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+          <i class="fas fa-circle text-[6px] align-middle mr-1"></i>系统就绪
+        </span>
+        <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i id="themeIcon" class="fas fa-moon text-lg"></i>
+        </button>
+        <button onclick="exportReport()" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors shadow-md">
+          <i class="fas fa-download mr-2"></i>导出报告
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ==================== 主内容区 ==================== -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+  <!-- ===== 搜索与控制栏 ===== -->
+  <div class="card p-5">
+    <div class="flex flex-wrap items-end gap-4">
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-sm font-medium mb-1.5 opacity-70">搜索提示词 <span class="text-[10px] opacity-40">(可选)</span></label>
+        <input id="searchQuery" type="text" placeholder="留空则AI自动分析品牌"
+               class="w-full px-4 py-2.5 rounded-lg border text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
+               style="background:var(--bg-primary);border-color:var(--border);color:var(--text-primary);">
+      </div>
+      <div class="flex-1 min-w-[180px]">
+        <label class="block text-sm font-medium mb-1.5 opacity-70">品牌名称 <span class="text-[10px] text-red-400">*</span></label>
+        <input id="brandName" type="text" placeholder="输入品牌名称开始分析..."
+               class="w-full px-4 py-2.5 rounded-lg border text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
+               style="background:var(--bg-primary);border-color:var(--border);color:var(--text-primary);">
+      </div>
+      <div class="w-[140px]">
+        <label class="block text-sm font-medium mb-1.5 opacity-70">模拟条数</label>
+        <select id="simCount" class="w-full px-4 py-2.5 rounded-lg border text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all"
+                style="background:var(--bg-primary);border-color:var(--border);color:var(--text-primary);">
+          <option value="10">10 条</option><option value="20" selected>20 条</option>
+          <option value="30">30 条</option><option value="50">50 条</option>
+        </select>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="runAnalysis()" id="analyzeBtn"
+                class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium text-sm hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl active:scale-95">
+          <i class="fas fa-magnifying-glass-chart mr-2"></i>开始分析
+        </button>
+        <button onclick="clearAll()" class="px-4 py-2.5 rounded-lg border text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                style="border-color:var(--border);color:var(--text-secondary);">
+          <i class="fas fa-rotate-left"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 4个KPI指标卡 ===== -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="card p-5 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10" id="riskIndexBg" style="background:#3b82f6;"></div>
+      <p class="text-sm opacity-60 mb-1">综合风险指数</p>
+      <p class="text-4xl font-bold" id="kpiRiskIndex">--</p>
+      <p class="text-xs opacity-50 mt-1">满分 100</p>
+    </div>
+    <div class="card p-5 relative overflow-hidden">
+      <p class="text-sm opacity-60 mb-1">风险等级</p>
+      <p class="text-3xl font-bold" id="kpiRiskLevel">--</p>
+      <p class="text-xs opacity-50 mt-1" id="kpiRiskDesc">等待分析</p>
+    </div>
+    <div class="card p-5 relative overflow-hidden">
+      <p class="text-sm opacity-60 mb-1">负面舆情数量</p>
+      <p class="text-4xl font-bold text-red-500" id="kpiNegative">--</p>
+      <p class="text-xs opacity-50 mt-1" id="kpiTotalSent">共 0 条</p>
+    </div>
+    <div class="card p-5 relative overflow-hidden">
+      <p class="text-sm opacity-60 mb-1">热搜预判概率</p>
+      <p class="text-4xl font-bold text-orange-500" id="kpiHotProb">--</p>
+      <p class="text-xs opacity-50 mt-1">预估上热搜概率</p>
+    </div>
+  </div>
+
+  <!-- ===== 图表行 ===== -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card p-5">
+      <h3 class="text-base font-semibold mb-4"><i class="fas fa-chart-pie text-brand-500 mr-2"></i>情感分布</h3>
+      <div class="flex items-center gap-4">
+        <div class="w-[180px] h-[180px] mx-auto"><canvas id="sentimentDoughnut"></canvas></div>
+        <div class="flex-1 space-y-2 text-sm">
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span>负面 <span id="dNeg" class="ml-auto font-bold">0</span></div>
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-gray-400"></span>中性 <span id="dNeu" class="ml-auto font-bold">0</span></div>
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span>正向 <span id="dPos" class="ml-auto font-bold">0</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card p-5">
+      <h3 class="text-base font-semibold mb-4"><i class="fas fa-chart-line text-brand-500 mr-2"></i>热度走势预测</h3>
+      <div class="h-[180px]"><canvas id="trendLine"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ===== 舆情列表 + 工作流可视化 ===== -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-semibold"><i class="fas fa-newspaper text-brand-500 mr-2"></i>舆情实时抓取</h3>
+        <div class="flex gap-2">
+          <select id="filterPlatform" onchange="filterSentiments()" class="px-2 py-1 rounded text-xs border" style="background:var(--bg-primary);border-color:var(--border);color:var(--text-primary);">
+            <option value="all">全部平台</option><option value="微博">微博</option><option value="抖音">抖音</option>
+            <option value="小红书">小红书</option><option value="新闻媒体">新闻媒体</option><option value="贴吧">贴吧</option><option value="知乎">知乎</option>
+          </select>
+          <select id="filterSentiment" onchange="filterSentiments()" class="px-2 py-1 rounded text-xs border" style="background:var(--bg-primary);border-color:var(--border);color:var(--text-primary);">
+            <option value="all">全部情感</option><option value="负面">负面</option><option value="中性">中性</option><option value="正向">正向</option>
+          </select>
+        </div>
+      </div>
+      <div id="sentimentList" class="space-y-2 max-h-[450px] overflow-y-auto pr-1">
+        <p class="text-sm opacity-40 text-center py-12">点击"开始分析"获取舆情数据</p>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <h3 class="text-base font-semibold mb-4"><i class="fas fa-diagram-project text-brand-500 mr-2"></i>LangGraph 多智能体工作流</h3>
+      <div id="workflowViz" class="relative py-2"></div>
+      <div id="workflowStatus" class="mt-4 p-3 rounded-lg text-xs" style="background:var(--bg-primary);">
+        <p class="opacity-50">等待启动分析...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 相似案例 ===== -->
+  <div class="card p-5">
+    <h3 class="text-base font-semibold mb-4"><i class="fas fa-clock-rotate-left text-brand-500 mr-2"></i>历史相似案例（RAG向量检索）</h3>
+    <div id="similarCasesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <p class="text-sm opacity-40 col-span-full text-center py-8">点击"开始分析"检索相似案例</p>
+    </div>
+  </div>
+
+  <!-- ===== 竞品 + 公关策略 ===== -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card p-5">
+      <h3 class="text-base font-semibold mb-4"><i class="fas fa-chess-queen text-brand-500 mr-2"></i>竞品反应推演</h3>
+      <div id="competitorList" class="space-y-3">
+        <p class="text-sm opacity-40 text-center py-8">点击"开始分析"推演竞品动作</p>
+      </div>
+    </div>
+    <div class="card p-5">
+      <h3 class="text-base font-semibold mb-4"><i class="fas fa-bullhorn text-brand-500 mr-2"></i>智能公关应对策略</h3>
+      <div id="strategyList" class="space-y-3">
+        <p class="text-sm opacity-40 text-center py-8">点击"开始分析"生成公关方案</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- 弹窗 + 加载 + Toast -->
+<div id="alertModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center modal-overlay">
+  <div class="card p-6 max-w-md w-full mx-4 text-center animate-bounce">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
+      <i class="fas fa-exclamation-triangle text-red-500 text-2xl pulse-alert"></i>
+    </div>
+    <h2 class="text-xl font-bold text-red-600 mb-2">⚠️ 高危预警</h2>
+    <p id="alertMsg" class="opacity-70 mb-4 text-sm"></p>
+    <div class="flex gap-2 justify-center">
+      <button onclick="closeAlert()" class="px-5 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors">我知道了</button>
+      <button onclick="closeAlert();window.scrollTo({top:document.getElementById('strategyList').offsetTop,behavior:'smooth'});"
+              class="px-5 py-2 rounded-lg border text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" style="border-color:var(--border);">查看应对方案</button>
+    </div>
+  </div>
+</div>
+
+<div id="loadingOverlay" class="fixed inset-0 z-[99] hidden flex items-center justify-center modal-overlay">
+  <div class="card p-8 text-center">
+    <div class="w-12 h-12 mx-auto mb-4 rounded-full border-4 border-brand-200 border-t-brand-600 spinner"></div>
+    <p class="font-medium">正在分析中...</p>
+    <p class="text-xs opacity-50 mt-1">LangGraph多智能体工作流运行中</p>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-6 right-6 z-[101] hidden transition-all duration-300"></div>
+
+<footer class="text-center py-6 text-xs opacity-40">
+  <p>舆情危机预警与智能公关推演系统 v1.0 | Powered by FastAPI + LangGraph + Qdrant</p>
+</footer>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

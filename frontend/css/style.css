@@ -1,0 +1,97 @@
+/* ============================================================
+   frontend/css/style.css - 全局样式（深色/浅色双模式）
+   ============================================================ */
+
+:root {
+  --bg-primary: #f8fafc;
+  --bg-card: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+  --radius: 12px;
+}
+
+.dark {
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --border: #334155;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4);
+}
+
+/* ==================== 基础重置 ==================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background 0.3s, color 0.3s;
+  min-height: 100vh;
+}
+
+/* ==================== 滚动条美化 ==================== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb { background: #475569; }
+
+/* ==================== 卡片组件 ==================== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-lg); }
+
+/* ==================== 列表行标签色 ==================== */
+.negative-row { border-left: 3px solid #ef4444; }
+.positive-row { border-left: 3px solid #22c55e; }
+.neutral-row { border-left: 3px solid #94a3b8; }
+
+/* ==================== 风险等级颜色 ==================== */
+.risk-critical { background: #ef4444; color: white; }
+.risk-high { background: #f97316; color: white; }
+.risk-medium { background: #eab308; color: #1e293b; }
+.risk-low { background: #22c55e; color: white; }
+
+/* ==================== 动画 ==================== */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { animation: spin 1s linear infinite; }
+
+@keyframes pulse-alert {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.pulse-alert { animation: pulse-alert 2s ease-in-out infinite; }
+
+@keyframes flow-line {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.flow-animate {
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6);
+  background-size: 200% 100%;
+  animation: flow-line 3s ease infinite;
+}
+
+/* ==================== 弹窗遮罩 ==================== */
+.modal-overlay {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+.dark .modal-overlay { background: rgba(0,0,0,0.7); }
+
+/* ==================== 渐变色标题 ==================== */
+.gradient-title {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
